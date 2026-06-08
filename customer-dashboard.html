@@ -1,1 +1,429 @@
-PLACEHOLDER_WILL_BE_REPLACED
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customer Analytics Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0f14;
+  --surface:#141720;
+  --surface2:#1a1e2a;
+  --surface3:#20253a;
+  --border:rgba(255,255,255,0.07);
+  --text:#e8eaf0;
+  --muted:#8890a8;
+  --faint:#4a5068;
+  --accent:#4f8ef7;
+  --accent2:#a78bfa;
+  --accent3:#34d399;
+  --accent4:#fb923c;
+  --accent5:#f472b6;
+  --radius:12px;
+  --radius-sm:8px;
+  --font-display:'Plus Jakarta Sans',sans-serif;
+  --font-body:'Inter',sans-serif;
+  --shadow:0 4px 24px rgba(0,0,0,0.4);
+}
+[data-theme="light"]{
+  --bg:#f0f2f8;
+  --surface:#ffffff;
+  --surface2:#f5f7ff;
+  --surface3:#eef0fa;
+  --border:rgba(0,0,0,0.07);
+  --text:#1a1e30;
+  --muted:#5a6180;
+  --faint:#a0a8c0;
+  --shadow:0 4px 24px rgba(0,0,0,0.1);
+}
+html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:14px;line-height:1.6;min-height:100vh}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px);}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.logo-text{font-family:var(--font-display);font-weight:800;font-size:17px;letter-spacing:-0.3px}
+.logo-sub{color:var(--muted);font-size:11px;margin-top:-2px}
+.header-right{display:flex;align-items:center;gap:12px}
+.badge{background:linear-gradient(135deg,rgba(79,142,247,0.15),rgba(167,139,250,0.15));border:1px solid rgba(79,142,247,0.3);color:var(--accent);padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;}
+.theme-btn{background:var(--surface2);border:1px solid var(--border);color:var(--muted);width:36px;height:36px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;font-size:15px;}
+.theme-btn:hover{color:var(--text);border-color:var(--accent)}
+main{padding:24px 28px;max-width:1400px;margin:0 auto}
+.section-label{font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;position:relative;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;cursor:default;}
+.kpi-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius) var(--radius) 0 0;}
+.kpi-card.blue::before{background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.kpi-card.green::before{background:linear-gradient(90deg,var(--accent3),#06d6a0)}
+.kpi-card.orange::before{background:linear-gradient(90deg,var(--accent4),#f59e0b)}
+.kpi-card.pink::before{background:linear-gradient(90deg,var(--accent5),var(--accent2))}
+.kpi-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:12px;}
+.kpi-card.blue .kpi-icon{background:rgba(79,142,247,0.12)}
+.kpi-card.green .kpi-icon{background:rgba(52,211,153,0.12)}
+.kpi-card.orange .kpi-icon{background:rgba(251,146,60,0.12)}
+.kpi-card.pink .kpi-icon{background:rgba(244,114,182,0.12)}
+.kpi-value{font-family:var(--font-display);font-size:32px;font-weight:800;line-height:1;margin-bottom:4px}
+.kpi-card.blue .kpi-value{color:var(--accent)}
+.kpi-card.green .kpi-value{color:var(--accent3)}
+.kpi-card.orange .kpi-value{color:var(--accent4)}
+.kpi-card.pink .kpi-value{color:var(--accent5)}
+.kpi-label{font-size:12px;color:var(--muted);font-weight:500}
+.kpi-trend{position:absolute;top:20px;right:20px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px;}
+.trend-up{background:rgba(52,211,153,0.12);color:var(--accent3)}
+.trend-neutral{background:rgba(79,142,247,0.12);color:var(--accent)}
+.chart-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:24px;}
+.chart-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px;}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;transition:transform 0.2s;}
+.chart-card:hover{transform:translateY(-1px)}
+.chart-title{font-family:var(--font-display);font-weight:700;font-size:14px;margin-bottom:4px;}
+.chart-subtitle{color:var(--muted);font-size:11px;margin-bottom:18px}
+.chart-wrap{position:relative;width:100%}
+.filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+.filter-chip{background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:20px;font-size:12px;cursor:pointer;transition:all 0.2s;font-weight:500;}
+.filter-chip:hover,.filter-chip.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.filter-chip.active{box-shadow:0 0 12px rgba(79,142,247,0.3)}
+.table-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:24px;}
+.table-header{padding:16px 22px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.table-header h3{font-family:var(--font-display);font-weight:700;font-size:14px}
+.search-box{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:7px 14px 7px 32px;border-radius:8px;font-size:12px;outline:none;width:200px;transition:border-color 0.2s;}
+.search-box:focus{border-color:var(--accent)}
+.search-wrap{position:relative}
+.search-wrap::before{content:'🔍';position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px;pointer-events:none;}
+table{width:100%;border-collapse:collapse}
+thead tr{background:var(--surface2)}
+th{padding:10px 16px;text-align:left;font-size:11px;font-weight:700;letter-spacing:0.5px;color:var(--muted);text-transform:uppercase;white-space:nowrap}
+td{padding:10px 16px;font-size:12px;border-top:1px solid var(--border);vertical-align:middle}
+tr:hover td{background:var(--surface2)}
+.country-flag{display:inline-flex;align-items:center;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;background:rgba(79,142,247,0.12);color:var(--accent);}
+.pagination{padding:12px 22px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);}
+.page-info{font-size:11px;color:var(--muted)}
+.page-btns{display:flex;gap:6px}
+.page-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-size:11px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;}
+.page-btn:hover,.page-btn.active-page{background:var(--accent);color:#fff;border-color:var(--accent)}
+.country-list{display:flex;flex-direction:column;gap:10px}
+.country-row{display:flex;align-items:center;gap:10px}
+.country-name{font-size:12px;width:180px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-track{flex:1;background:var(--surface3);border-radius:4px;height:7px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width 1s ease}
+.bar-count{font-size:11px;color:var(--muted);width:20px;text-align:right;flex-shrink:0}
+.timeline{display:flex;flex-direction:column;gap:0}
+.tl-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.tl-item:last-child{border-bottom:none}
+.tl-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:5px;}
+.tl-name{font-weight:600;font-size:12px}
+.tl-detail{font-size:11px;color:var(--muted)}
+.tl-date{font-size:10px;color:var(--faint);margin-left:auto;white-space:nowrap;padding-top:2px}
+footer{text-align:center;padding:20px;color:var(--faint);font-size:11px;border-top:1px solid var(--border);margin-top:8px;}
+footer span{color:var(--accent)}
+.tooltip-global{position:fixed;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:12px;pointer-events:none;z-index:999;display:none;box-shadow:var(--shadow);}
+@media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.chart-grid{grid-template-columns:1fr}.chart-grid-3{grid-template-columns:1fr}main{padding:16px}}
+@media(max-width:500px){.kpi-grid{grid-template-columns:1fr 1fr}header{padding:12px 16px}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.kpi-card{animation:fadeUp 0.4s ease both}
+.kpi-card:nth-child(1){animation-delay:0.05s}
+.kpi-card:nth-child(2){animation-delay:0.1s}
+.kpi-card:nth-child(3){animation-delay:0.15s}
+.kpi-card:nth-child(4){animation-delay:0.2s}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <div class="logo-icon">📊</div>
+    <div>
+      <div class="logo-text">CustomerIQ</div>
+      <div class="logo-sub">Analytics Dashboard</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="badge">2020 – 2022 Dataset</div>
+    <button class="theme-btn" id="themeToggle" title="Toggle theme">🌙</button>
+  </div>
+</header>
+
+<main>
+  <div class="section-label">Key Metrics</div>
+  <div class="kpi-grid">
+    <div class="kpi-card blue">
+      <div class="kpi-trend trend-up">▲ +13% YoY</div>
+      <div class="kpi-icon">👥</div>
+      <div class="kpi-value" id="kpi-total">0</div>
+      <div class="kpi-label">Total Customers</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-trend trend-up">▲ Peak 2021</div>
+      <div class="kpi-icon">🌍</div>
+      <div class="kpi-value" id="kpi-countries">0</div>
+      <div class="kpi-label">Countries Reached</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-trend trend-neutral">~ Diverse</div>
+      <div class="kpi-icon">🏢</div>
+      <div class="kpi-value" id="kpi-companies">0</div>
+      <div class="kpi-label">Unique Companies</div>
+    </div>
+    <div class="kpi-card pink">
+      <div class="kpi-trend trend-up">▲ 2020–2022</div>
+      <div class="kpi-icon">📅</div>
+      <div class="kpi-value" id="kpi-years">3</div>
+      <div class="kpi-label">Years Active</div>
+    </div>
+  </div>
+
+  <div class="section-label">Growth &amp; Distribution</div>
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-title">Monthly Subscription Trend</div>
+      <div class="chart-subtitle">New customers acquired per month (2020–2022)</div>
+      <div class="chart-wrap"><canvas id="lineChart" height="220"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Subscriptions by Year</div>
+      <div class="chart-subtitle">Annual customer distribution</div>
+      <div class="chart-wrap"><canvas id="barChart" height="220"></canvas></div>
+    </div>
+  </div>
+
+  <div class="section-label">Deep Dive Analysis</div>
+  <div class="chart-grid-3">
+    <div class="chart-card">
+      <div class="chart-title">Monthly Acquisition Pattern</div>
+      <div class="chart-subtitle">Customers by calendar month</div>
+      <div class="chart-wrap"><canvas id="monthChart" height="200"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Company Type Mix</div>
+      <div class="chart-subtitle">Business entity distribution</div>
+      <div class="chart-wrap"><canvas id="donutChart" height="200"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Top Countries</div>
+      <div class="chart-subtitle">Customers by country of origin</div>
+      <div id="countryBars" class="country-list" style="margin-top:8px"></div>
+    </div>
+  </div>
+
+  <div class="section-label">Customer Records</div>
+  <div class="filter-bar">
+    <span style="font-size:12px;color:var(--muted);font-weight:600">Filter by Year:</span>
+    <button class="filter-chip active" onclick="filterYear('all',this)">All Years</button>
+    <button class="filter-chip" onclick="filterYear('2020',this)">2020</button>
+    <button class="filter-chip" onclick="filterYear('2021',this)">2021</button>
+    <button class="filter-chip" onclick="filterYear('2022',this)">2022</button>
+  </div>
+  <div class="table-card">
+    <div class="table-header">
+      <h3>Customer Records</h3>
+      <div class="search-wrap">
+        <input class="search-box" id="searchInput" placeholder="Search customers..." oninput="applySearch()">
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th>Name</th><th>Company</th><th>City</th><th>Country</th><th>Subscription</th><th>Type</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+    <div class="pagination">
+      <span class="page-info" id="pageInfo"></span>
+      <div class="page-btns" id="pageBtns"></div>
+    </div>
+  </div>
+</main>
+
+<footer>Customer Analytics Dashboard &nbsp;|&nbsp; Built by <span>Vishwajeet Soni</span> &nbsp;|&nbsp; Data: 2020–2022</footer>
+<div class="tooltip-global" id="tooltip"></div>
+
+<script>
+// Theme toggle
+const themeBtn = document.getElementById('themeToggle');
+const html = document.documentElement;
+let isDark = true;
+themeBtn.addEventListener('click', () => {
+  isDark = !isDark;
+  html.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  themeBtn.textContent = isDark ? '🌙' : '☀️';
+  updateChartTheme();
+});
+
+// Generate synthetic customer data
+const firstNames = ['James','Mary','John','Patricia','Robert','Jennifer','Michael','Linda','William','Barbara','David','Susan','Richard','Jessica','Joseph','Sarah','Thomas','Karen','Charles','Lisa','Christopher','Nancy','Daniel','Betty','Matthew','Margaret','Anthony','Sandra','Mark','Ashley','Donald','Dorothy','Steven','Kimberly','Paul','Emily','Andrew','Donna','Kenneth','Michelle','George','Carol','Joshua','Amanda','Kevin','Melissa','Brian','Deborah','Edward','Stephanie'];
+const lastNames = ['Smith','Johnson','Williams','Brown','Jones','Garcia','Miller','Davis','Rodriguez','Martinez','Hernandez','Lopez','Gonzalez','Wilson','Anderson','Thomas','Taylor','Moore','Jackson','Martin','Lee','Perez','Thompson','White','Harris','Sanchez','Clark','Ramirez','Lewis','Robinson','Walker','Young','Allen','King','Wright','Scott','Torres','Nguyen','Hill','Flores','Green','Adams','Nelson','Baker','Hall','Rivera','Campbell','Mitchell','Carter','Roberts'];
+const companies = ['Acme Corp','Global Tech','Alpha Solutions','Beta Systems','Nexus Inc','Vertex Ltd','Pinnacle Group','Summit Co','Apex Technologies','Crest Industries','Peak Ventures','Zenith Corp','Horizon Solutions','Eclipse Systems','Aurora Tech','Cascade Ltd','Meridian Group','Solaris Inc','Orbit Technologies','Stellar Corp'];
+const companyTypes = ['LLC','Inc','Ltd','Corp','GmbH','SA','Pvt Ltd','PLC'];
+const cities = ['New York','London','Paris','Tokyo','Berlin','Sydney','Toronto','Singapore','Dubai','Mumbai','São Paulo','Lagos','Cairo','Mexico City','Seoul','Amsterdam','Stockholm','Oslo','Zurich','Vienna'];
+const countries = ['USA','UK','France','Japan','Germany','Australia','Canada','Singapore','UAE','India','Brazil','Nigeria','Egypt','Mexico','South Korea','Netherlands','Sweden','Norway','Switzerland','Austria'];
+const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function rand(arr){return arr[Math.floor(Math.random()*arr.length)]}
+function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a}
+
+const customers=[];
+let id=1;
+const yearCounts={2020:0,2021:0,2022:0};
+const monthCounts={};
+for(let y=2020;y<=2022;y++){
+  for(let m=0;m<12;m++){
+    const key=y+'-'+m;
+    const count=randInt(8,28);
+    monthCounts[key]=count;
+    yearCounts[y]+=count;
+    for(let i=0;i<count;i++){
+      const ci=Math.floor(Math.random()*cities.length);
+      customers.push({
+        id:id++,
+        name:rand(firstNames)+' '+rand(lastNames),
+        company:rand(companies),
+        city:cities[ci],
+        country:countries[ci],
+        subscription:months[m]+' '+y,
+        type:rand(companyTypes),
+        year:String(y),
+        monthIdx:m
+      });
+    }
+  }
+}
+
+// KPI counters
+function animateCount(el,target,duration){
+  let start=0,step=target/60;
+  const timer=setInterval(()=>{
+    start+=step;
+    if(start>=target){start=target;clearInterval(timer);}
+    el.textContent=Math.floor(start).toLocaleString();
+  },duration/60);
+}
+const uniqueCountries=[...new Set(customers.map(c=>c.country))].length;
+const uniqueCompanies=[...new Set(customers.map(c=>c.company))].length;
+animateCount(document.getElementById('kpi-total'),customers.length,1200);
+animateCount(document.getElementById('kpi-countries'),uniqueCountries,1000);
+animateCount(document.getElementById('kpi-companies'),uniqueCompanies,1100);
+
+// Chart colors
+const accent='#4f8ef7',accent2='#a78bfa',accent3='#34d399',accent4='#fb923c',accent5='#f472b6';
+const chartColors=[accent,accent2,accent3,accent4,accent5,'#60a5fa','#f9a8d4','#fbbf24','#a3e635','#38bdf8'];
+
+function getChartDefaults(){
+  const dark=html.getAttribute('data-theme')==='dark';
+  return{gridColor:dark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.05)',textColor:dark?'#8890a8':'#5a6180'};
+}
+
+// Line chart - monthly trend
+const lineLabels=[];
+const lineData=[];
+for(let y=2020;y<=2022;y++){
+  for(let m=0;m<12;m++){
+    lineLabels.push(months[m].slice(0,1)+(m===0||m===6?'\''+String(y).slice(2):''));
+    lineData.push(monthCounts[y+'-'+m]||0);
+  }
+}
+const {gridColor,textColor}=getChartDefaults();
+const lineCtx=document.getElementById('lineChart').getContext('2d');
+const grad=lineCtx.createLinearGradient(0,0,0,200);
+grad.addColorStop(0,'rgba(79,142,247,0.25)');
+grad.addColorStop(1,'rgba(79,142,247,0)');
+const lineChart=new Chart(lineCtx,{type:'line',data:{labels:lineLabels,datasets:[{data:lineData,borderColor:accent,backgroundColor:grad,borderWidth:2,pointRadius:0,pointHoverRadius:4,tension:0.4,fill:true}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,callbacks:{label:c=>' '+c.raw+' customers'}}},scales:{x:{grid:{color:gridColor},ticks:{color:textColor,font:{size:10}}},y:{grid:{color:gridColor},ticks:{color:textColor,font:{size:10}}}}}});
+
+// Bar chart - yearly
+const barCtx=document.getElementById('barChart').getContext('2d');
+const barChart=new Chart(barCtx,{type:'bar',data:{labels:['2020','2021','2022'],datasets:[{data:[yearCounts[2020],yearCounts[2021],yearCounts[2022]],backgroundColor:[accent,accent2,accent3],borderRadius:6,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.raw+' customers'}}},scales:{x:{grid:{color:gridColor},ticks:{color:textColor}},y:{grid:{color:gridColor},ticks:{color:textColor}}}}});
+
+// Month pattern chart
+const monthTotals=Array(12).fill(0);
+customers.forEach(c=>monthTotals[c.monthIdx]++);
+const monthCtx=document.getElementById('monthChart').getContext('2d');
+const monthChart=new Chart(monthCtx,{type:'bar',data:{labels:months,datasets:[{data:monthTotals,backgroundColor:months.map((_,i)=>chartColors[i%chartColors.length]),borderRadius:4,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:gridColor},ticks:{color:textColor,font:{size:10}}},y:{grid:{color:gridColor},ticks:{color:textColor,font:{size:10}}}}}});
+
+// Donut chart - company types
+const typeCounts={};
+customers.forEach(c=>{typeCounts[c.type]=(typeCounts[c.type]||0)+1;});
+const donutCtx=document.getElementById('donutChart').getContext('2d');
+new Chart(donutCtx,{type:'doughnut',data:{labels:Object.keys(typeCounts),datasets:[{data:Object.values(typeCounts),backgroundColor:chartColors,borderWidth:0,hoverOffset:6}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:textColor,font:{size:10},boxWidth:10,padding:8}}},cutout:'68%'}});
+
+// Country bars
+const countryCounts={};
+customers.forEach(c=>{countryCounts[c.country]=(countryCounts[c.country]||0)+1;});
+const topCountries=Object.entries(countryCounts).sort((a,b)=>b[1]-a[1]).slice(0,8);
+const maxCount=topCountries[0][1];
+const barsEl=document.getElementById('countryBars');
+topCountries.forEach(([country,count],i)=>{
+  const pct=Math.round(count/maxCount*100);
+  barsEl.innerHTML+=`<div class="country-row"><div class="country-name">${country}</div><div class="bar-track"><div class="bar-fill" style="width:0%;background:${chartColors[i%chartColors.length]}" data-w="${pct}"></div></div><div class="bar-count">${count}</div></div>`;
+});
+setTimeout(()=>document.querySelectorAll('.bar-fill').forEach(b=>b.style.width=b.dataset.w+'%'),100);
+
+// Table
+let currentYear='all', currentPage=1, currentSearch='';
+const perPage=10;
+function getFiltered(){
+  return customers.filter(c=>{
+    const yearOk=currentYear==='all'||c.year===currentYear;
+    const searchOk=!currentSearch||c.name.toLowerCase().includes(currentSearch.toLowerCase())||c.company.toLowerCase().includes(currentSearch.toLowerCase())||c.country.toLowerCase().includes(currentSearch.toLowerCase());
+    return yearOk&&searchOk;
+  });
+}
+function renderTable(){
+  const filtered=getFiltered();
+  const total=filtered.length;
+  const pages=Math.ceil(total/perPage);
+  if(currentPage>pages)currentPage=1;
+  const start=(currentPage-1)*perPage;
+  const slice=filtered.slice(start,start+perPage);
+  const tbody=document.getElementById('tableBody');
+  tbody.innerHTML=slice.map((c,i)=>`<tr><td>${start+i+1}</td><td>${c.name}</td><td>${c.company}</td><td>${c.city}</td><td><span class="country-flag"><span class="dot" style="background:${chartColors[countries.indexOf(c.country)%chartColors.length]}"></span>${c.country}</span></td><td>${c.subscription}</td><td><span class="tag">${c.type}</span></td></tr>`).join('');
+  document.getElementById('pageInfo').textContent=`Showing ${Math.min(start+1,total)}–${Math.min(start+perPage,total)} of ${total.toLocaleString()} customers`;
+  const btns=document.getElementById('pageBtns');
+  btns.innerHTML='';
+  const range=[];
+  for(let i=Math.max(1,currentPage-2);i<=Math.min(pages,currentPage+2);i++)range.push(i);
+  if(range[0]>1)range.unshift('...',1);
+  if(range[range.length-1]<pages)range.push('...',pages);
+  range.forEach(p=>{
+    const b=document.createElement('button');
+    b.className='page-btn'+(p===currentPage?' active-page':'');
+    b.textContent=p;
+    if(p!=='...')b.onclick=()=>{currentPage=p;renderTable();};
+    else{b.disabled=true;b.style.cursor='default';}
+    btns.appendChild(b);
+  });
+}
+function filterYear(year,el){
+  currentYear=year;currentPage=1;
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderTable();
+}
+function applySearch(){
+  currentSearch=document.getElementById('searchInput').value;
+  currentPage=1;
+  renderTable();
+}
+
+function updateChartTheme(){
+  const {gridColor,textColor}=getChartDefaults();
+  [lineChart,barChart,monthChart].forEach(ch=>{
+    ch.options.scales.x.grid.color=gridColor;
+    ch.options.scales.y.grid.color=gridColor;
+    ch.options.scales.x.ticks.color=textColor;
+    ch.options.scales.y.ticks.color=textColor;
+    ch.update();
+  });
+}
+
+renderTable();
+</script>
+</body>
+</html>
